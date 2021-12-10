@@ -64,7 +64,7 @@ def download_extra_files(save_dir):
 def convert_paddle_checkpoint_to_pytorch(paddle_checkpoint_path, pytorch_dump_path):
     import torch
     from paddlenlp.transformers import ErnieCtmModel as PErnieCtmModel, ErnieCtmWordtagModel as PErnieCtmForWordtag, ErnieCtmTokenizer as PErnieCtmTokenizer
-    from ernie_ctm import ErnieCtmConfig, ErnieCtmModel, ErnieCtmForWordtag, ErnieCtmForNptag
+    from transformers_ernie.ernie_ctm import ErnieCtmConfig, ErnieCtmModel, ErnieCtmForWordtag, ErnieCtmForNptag
 
 
     # Initialise PyTorch model

@@ -26,7 +26,7 @@ logging.set_verbosity_info()
 def convert_paddle_checkpoint_to_pytorch(paddle_checkpoint_path, pytorch_dump_path):
     import torch
     from paddlenlp.transformers import ErnieForPretraining as PErnieForPreTraining, ErnieTokenizer as PErnieTokenizer
-    from ernie import ErnieConfig, ErnieForPreTraining
+    from transformers_ernie import ErnieConfig, ErnieForPreTraining
 
     # Initialise PyTorch model
     src_model = PErnieForPreTraining.from_pretrained(paddle_checkpoint_path)
