@@ -3,7 +3,7 @@
 I implement Ernie model with `transformers` for study and work.
 
 ## Usage
-```python`
+```python
 from transformers_ernie.ernie import ErnieConfig, ErnieForPreTraining, ErnieTokenizer, ErnieTokenizerFast
 model = ErnieForPreTraining.from_pretrained("./ernie-1.0")
 tokenizer = ErnieTokenizerFast.from_pretrained("./ernie-1.0")
