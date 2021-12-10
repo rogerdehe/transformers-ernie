@@ -5,7 +5,7 @@ If you want know more about `Ernie`, please refer [offical url](https://github.c
 
 ## Usage
 ```python
-from transformers_ernie.ernie import ErnieConfig, ErnieForPreTraining, ErnieTokenizer, ErnieTokenizerFast
+from transformers_ernie import ErnieConfig, ErnieForPreTraining, ErnieTokenizer, ErnieTokenizerFast
 model = ErnieForPreTraining.from_pretrained("./ernie-1.0")
 tokenizer = ErnieTokenizerFast.from_pretrained("./ernie-1.0")
 
@@ -16,7 +16,7 @@ print(model_output)
 ```
 
 ```python
-from ernie_ctm import ErnieCtmConfig, ErnieCtmModel, ErnieCtmForWordtag, ErnieCtmForNptag, ErnieCtmTokenizer, ErnieCtmTokenizerFast
+from transformers_ernie import ErnieCtmConfig, ErnieCtmModel, ErnieCtmForWordtag, ErnieCtmForNptag, ErnieCtmTokenizer, ErnieCtmTokenizerFast
 model = ErnieCtmForWordtag.from_pretrained("./wordtag", num_cls_label=4, num_tag=265)
 tokenizer = ErnieCtmTokenizerFast.from_pretrained("./wordtag")
 
