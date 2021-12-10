@@ -17,7 +17,7 @@ print(model_output)
 ```python
 from ernie_ctm import ErnieCtmConfig, ErnieCtmModel, ErnieCtmForWordtag, ErnieCtmForNptag, ErnieCtmTokenizer, ErnieCtmTokenizerFast
 model = ErnieCtmForWordtag.from_pretrained("./wordtag", num_cls_label=4, num_tag=265)
-tokenizer = ErnieTokenizerFast.from_pretrained("./wordtag")
+tokenizer = ErnieCtmTokenizerFast.from_pretrained("./wordtag")
 
 texts = ["吉林省会是哪里", "哈尔滨是黑龙江的省会城市"]
 args = tokenizer(texts, padding=True, return_tensors="pt", return_length=True)
