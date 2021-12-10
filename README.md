@@ -31,10 +31,6 @@ print(model_output)
 1. First, you need to install `paddlenlp` with `pip install paddlenlp`
 
 2. Then you can run script `convert_original_paddle_checkpoint_to_pytorch.py` in `src/transformers_ernie`. 
-This script will: 
-- download model from paddle repository if model name given.
-- load model into paddle
-- convert paddle model to PyTorch model.
 
 - ernie-1.0
 ```Shell
@@ -50,6 +46,10 @@ python src/transformers_ernie/convert_original_paddle_checkpoint_to_pytorch.py -
 ```Shell
 python src/transformers_ernie/convert_original_paddle_checkpoint_to_pytorch.py --paddle_checkpoint_path wordtag --pytorch_dump_path ./wordtag
 ```
+This script will: 
+- download model from paddle repository if model name given.
+- load model into paddle
+- convert paddle model to PyTorch model.
 
 ## TODO
 I will convert more model next
