@@ -1,6 +1,7 @@
 # Ernie Implemented by Transformers
 
 I implement Ernie model with `transformers` for study and work.
+If you want know more about `Ernie`, please refer [offical url](https://github.com/PaddlePaddle/ERNIE)
 
 ## Usage
 ```python
@@ -27,9 +28,13 @@ print(model_output)
 
 ## Convert Model for yourself
 
-First, you need to install `paddlenlp` with `pip install paddlenlp`
+1. First, you need to install `paddlenlp` with `pip install paddlenlp`
 
-Then you can run script `convert_original_paddle_checkpoint_to_pytorch.py` in `src/transformers_ernie`. This script will download model then convert to pytorch model.
+2. Then you can run script `convert_original_paddle_checkpoint_to_pytorch.py` in `src/transformers_ernie`. 
+This script will: 
+- download model from paddle repository if model name given.
+- load model into paddle
+- convert paddle model to PyTorch model.
 
 - ernie-1.0
 ```Shell
@@ -46,3 +51,5 @@ python src/transformers_ernie/convert_original_paddle_checkpoint_to_pytorch.py -
 python src/transformers_ernie/convert_original_paddle_checkpoint_to_pytorch.py --paddle_checkpoint_path wordtag --pytorch_dump_path ./wordtag
 ```
 
+## TODO
+I will convert more model next
