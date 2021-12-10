@@ -17,9 +17,12 @@
 import json
 from typing import List, Optional, Tuple, Dict, Any
 
-from tokenizers import Encoding as EncodingFast
-from transformers.models.bert import BertTokenizerFast, BertTokenizer
+from tokenizers import Tokenizer, decoders, normalizers, pre_tokenizers, processors, Encoding as EncodingFast
+from tokenizers.models import WordPiece
+from transformers import PreTrainedTokenizerFast
+from transformers.convert_slow_tokenizer import Converter
 from transformers.utils import logging
+from .tokenization_ernie_ctm import ErnieCtmTokenizer
 
 
 logger = logging.get_logger(__name__)
@@ -36,7 +39,7 @@ PRETRAINED_VOCAB_FILES_MAP = {
 }
 
 PRETRAINED_POSITIONAL_EMBEDDINGS_SIZES = {
-    "ernie-1.0": 512,
+    "ernie-ctm": 128,
 }
 
 PRETRAINED_INIT_CONFIGURATION = {
@@ -44,7 +47,43 @@ PRETRAINED_INIT_CONFIGURATION = {
 }
 
 
-class ErnieCtmTokenizerFast(BertTokenizerFast):
+class ErnieCtmConverter(Converter):
+    def converted(self) -> Tokenizer:
+        vocab = self.original_tokenizer.vocab
+        tokenizer = Tokenizer(WordPiece(vocab, unk_token=str(self.original_tokenizer.unk_token)))
+
+        tokenize_chinese_chars = False
+        strip_accents = False
+        do_lower_case = False
+        if hasattr(self.original_tokenizer, "basic_tokenizer"):
+            tokenize_chinese_chars = self.original_tokenizer.basic_tokenizer.tokenize_chinese_chars
+            strip_accents = self.original_tokenizer.basic_tokenizer.strip_accents
+            do_lower_case = self.original_tokenizer.basic_tokenizer.do_lower_case
+
+        tokenizer.normalizer = normalizers.BertNormalizer(
+            clean_text=True,
+            handle_chinese_chars=tokenize_chinese_chars,
+            strip_accents=strip_accents,
+            lowercase=do_lower_case,
+        )
+        tokenizer.pre_tokenizer = pre_tokenizers.BertPreTokenizer()
+
+        cls = [f"{self.original_tokenizer.cls_token_template.format(sid)}" for sid in range(self.original_tokenizer.cls_num)]
+        sep = str(self.original_tokenizer.sep_token)
+        cls_token_id = self.original_tokenizer.convert_tokens_to_ids(cls)
+        sep_token_id = self.original_tokenizer.sep_token_id
+
+        tokenizer.post_processor = processors.TemplateProcessing(
+            single=" ".join([f"{v}:0" for v in cls]) + f" $A:0 {sep}:0",
+            pair=" ".join([f"{v}:0" for v in cls]) + f" $A:0 {sep}:0 $B:1 {sep}:1",
+            special_tokens=list(zip(cls, cls_token_id)) + [(sep, sep_token_id),],
+        )
+        tokenizer.decoder = decoders.WordPiece(prefix="##")
+
+        return tokenizer
+
+
+class ErnieCtmTokenizerFast(PreTrainedTokenizerFast):
     r"""
     Construct a "fast" ERNIE tokenizer (backed by HuggingFace's `tokenizers` library). Based on WordPiece.
 
@@ -88,7 +127,43 @@ class ErnieCtmTokenizerFast(BertTokenizerFast):
     pretrained_vocab_files_map = PRETRAINED_VOCAB_FILES_MAP
     pretrained_init_configuration = PRETRAINED_INIT_CONFIGURATION
     max_model_input_sizes = PRETRAINED_POSITIONAL_EMBEDDINGS_SIZES
-    slow_tokenizer_class = BertTokenizer
+    slow_tokenizer_class = ErnieCtmTokenizer
+
+    def __init__(self,
+                 vocab_file,
+                 do_lower_case=True,
+                 do_basic_tokenize=True,
+                 unk_token="[UNK]",
+                 sep_token="[SEP]",
+                 pad_token="[PAD]",
+                 cls_token_template="[CLS{}]",
+                 cls_num=1,
+                 mask_token="[MASK]",
+                 **kwargs):
+
+        slow_tokenizer = self.slow_tokenizer_class(vocab_file=vocab_file,
+                                                   do_lower_case=do_lower_case,
+                                                   do_basic_tokenize=do_basic_tokenize,
+                                                   unk_token=unk_token,
+                                                   sep_token=sep_token,
+                                                   pad_token=pad_token,
+                                                   cls_token_template=cls_token_template,
+                                                   cls_num=cls_num,
+                                                   mask_token=mask_token,
+                                                   **kwargs)
+        fast_tokenizer = ErnieCtmConverter(slow_tokenizer).converted()
+
+        super().__init__(vocab_file=vocab_file,
+                         do_lower_case=do_lower_case,
+                         do_basic_tokenize=do_basic_tokenize,
+                         unk_token=unk_token,
+                         sep_token=sep_token,
+                         pad_token=pad_token,
+                         mask_token=mask_token,
+                         tokenizer_object=fast_tokenizer,
+                         **kwargs)
+        self.cls_token_template = cls_token_template
+        self.cls_num = cls_num
 
     def _convert_encoding(
         self,
@@ -110,4 +185,6 @@ class ErnieCtmTokenizerFast(BertTokenizerFast):
                                                              return_length=return_length,
                                                              verbose=verbose)
         encoding_dict["attention_mask"] = [[0 if m == 1 else -1e9 for m in v] for v in encoding_dict["attention_mask"]]
+        if return_length:
+            encoding_dict["length"] = [len([tid for tid in v if tid != self.pad_token_id]) for v in encoding_dict["input_ids"]]
         return encoding_dict, encodings

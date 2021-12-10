@@ -89,6 +89,52 @@ class ErnieCtmTokenizer(BertTokenizer):
     pretrained_init_configuration = PRETRAINED_INIT_CONFIGURATION
     max_model_input_sizes = PRETRAINED_POSITIONAL_EMBEDDINGS_SIZES
 
+    def __init__(self,
+                 vocab_file,
+                 do_lower_case=True,
+                 do_basic_tokenize=True,
+                 unk_token="[UNK]",
+                 sep_token="[SEP]",
+                 pad_token="[PAD]",
+                 cls_token_template="[CLS{}]",
+                 cls_num=1,
+                 mask_token="[MASK]",
+                 **kwargs):
+        super().__init__(vocab_file=vocab_file,
+                         do_lower_case=do_lower_case,
+                         do_basic_tokenize=do_basic_tokenize,
+                         unk_token=unk_token,
+                         sep_token=sep_token,
+                         pad_token=pad_token,
+                         mask_token=mask_token,
+                         **kwargs)
+        self.cls_token_template = cls_token_template
+        self.cls_num = cls_num
+
+    def build_inputs_with_special_tokens(self, token_ids_0, token_ids_1=None):
+        """
+        Build model inputs from a sequence or a pair of sequence for sequence classification tasks by concatenating and
+        adding special tokens. A BERT sequence has the following format:
+        - single sequence: ``[CLS] X [SEP]``
+        - pair of sequences: ``[CLS] A [SEP] B [SEP]``
+        Args:
+            token_ids_0 (:obj:`List[int]`):
+                List of IDs to which the special tokens will be added.
+            token_ids_1 (:obj:`List[int]`, `optional`):
+                Optional second list of IDs for sequence pairs.
+        Returns:
+            :obj:`List[int]`: List of `input IDs <../glossary.html#input-ids>`__ with the appropriate special tokens.
+        """
+        cls = [self.convert_tokens_to_ids(self.cls_token_template.format(sid)) for sid in range(self.cls_num)]
+        sep = [self.sep_token_id]
+
+        output = cls + token_ids_0 + sep
+
+        if token_ids_1:
+            output += token_ids_1 + sep
+
+        return output
+
     def _pad(
         self,
         encoded_inputs: Union[Dict[str, EncodedInput], BatchEncoding],

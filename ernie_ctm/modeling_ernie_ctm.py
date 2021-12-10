@@ -142,7 +142,7 @@ class ErnieCtmPreTrainedModel(PreTrainedModel):
     """
 
     config_class = ErnieCtmConfig
-    base_model_prefix = "ernie"
+    base_model_prefix = "ernie-ctm"
     supports_gradient_checkpointing = True
     _keys_to_ignore_on_load_missing = [r"position_ids"]
 
@@ -499,7 +499,7 @@ class ErnieCtmForWordtag(ErnieCtmPreTrainedModel):
         position_ids=None,
         head_mask=None,
         inputs_embeds=None,
-        lengths=None,
+        length=None,
         labels=None,
         next_sentence_label=None,
         output_attentions=None,
@@ -560,7 +560,7 @@ class ErnieCtmForWordtag(ErnieCtmPreTrainedModel):
             loss_fct = CrossEntropyLoss(ignore_index=self.ignore_index)
             next_sentence_loss = loss_fct(seq_relationship_score.view(-1, self.num_cls_label), next_sentence_label.view(-1))
 
-            seq_crf_loss = self.crf_loss(seq_tag_scores, lengths, labels)
+            seq_crf_loss = self.crf_loss(seq_tag_scores, length, labels)
             total_loss = next_sentence_loss + seq_crf_loss
 
         if not return_dict:
