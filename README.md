@@ -14,7 +14,7 @@ model_output = model(**args)
 print(model_output)
 ```
 
-```python`
+```python
 from ernie_ctm import ErnieCtmConfig, ErnieCtmModel, ErnieCtmForWordtag, ErnieCtmForNptag, ErnieCtmTokenizer, ErnieCtmTokenizerFast
 model = ErnieCtmForWordtag.from_pretrained("./wordtag", num_cls_label=4, num_tag=265)
 tokenizer = ErnieTokenizerFast.from_pretrained("./wordtag")
